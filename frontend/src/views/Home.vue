@@ -29,11 +29,11 @@
             </div>
           </div>
           <div class="column is-half">
-            <button class="button is-primary" v-on:click="addOptions">Add Prize</button>
+            <button class="button is-primary" v-on:click="addOptions">Add</button>
           </div>
           <div class="column is-one-quarter" v-for="option in options" :key="option">
             <button class="button is-danger" v-on:click="removeOptions(option)">x</button>
-            <span> {{option}} </span>
+            <span> {{ option }} </span>
           </div>
         </div>
       </div>
@@ -91,6 +91,7 @@ export default {
       this.new_option = '';
       this.drawRouletteWheel();
     },
+
     removeOptions(option) {
       const idx = this.options.indexOf(option) || 0;
       this.options.splice(idx, 1);
