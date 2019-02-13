@@ -181,7 +181,7 @@ export default {
       clearTimeout(this.spinTimeout);
       const degrees = this.startAngle * 180 / Math.PI + 90;
       const arcd = this.arc * 180 / Math.PI;
-      const index = Math.floor(((360 - degrees) % 360) / arcd);
+      const index = Math.floor((360 - (degrees % 360)) / arcd);
       this.ctx.save();
       this.ctx.font = 'bold 30px Helvetica, Arial';
       const text = this.options[index];
