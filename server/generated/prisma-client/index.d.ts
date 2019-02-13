@@ -14,6 +14,7 @@ export type AtLeastOne<T, U = { [K in keyof T]: Pick<T, K> }> = Partial<T> &
   U[keyof U];
 
 export interface Exists {
+  rouletteHistory: (where?: RouletteHistoryWhereInput) => Promise<boolean>;
   user: (where?: UserWhereInput) => Promise<boolean>;
 }
 
@@ -36,6 +37,27 @@ export interface Prisma {
    * Queries
    */
 
+  rouletteHistory: (
+    where: RouletteHistoryWhereUniqueInput
+  ) => RouletteHistoryPromise;
+  rouletteHistories: (args?: {
+    where?: RouletteHistoryWhereInput;
+    orderBy?: RouletteHistoryOrderByInput;
+    skip?: Int;
+    after?: String;
+    before?: String;
+    first?: Int;
+    last?: Int;
+  }) => FragmentableArray<RouletteHistory>;
+  rouletteHistoriesConnection: (args?: {
+    where?: RouletteHistoryWhereInput;
+    orderBy?: RouletteHistoryOrderByInput;
+    skip?: Int;
+    after?: String;
+    before?: String;
+    first?: Int;
+    last?: Int;
+  }) => RouletteHistoryConnectionPromise;
   user: (where: UserWhereUniqueInput) => UserPromise;
   users: (args?: {
     where?: UserWhereInput;
@@ -61,6 +83,28 @@ export interface Prisma {
    * Mutations
    */
 
+  createRouletteHistory: (
+    data: RouletteHistoryCreateInput
+  ) => RouletteHistoryPromise;
+  updateRouletteHistory: (args: {
+    data: RouletteHistoryUpdateInput;
+    where: RouletteHistoryWhereUniqueInput;
+  }) => RouletteHistoryPromise;
+  updateManyRouletteHistories: (args: {
+    data: RouletteHistoryUpdateManyMutationInput;
+    where?: RouletteHistoryWhereInput;
+  }) => BatchPayloadPromise;
+  upsertRouletteHistory: (args: {
+    where: RouletteHistoryWhereUniqueInput;
+    create: RouletteHistoryCreateInput;
+    update: RouletteHistoryUpdateInput;
+  }) => RouletteHistoryPromise;
+  deleteRouletteHistory: (
+    where: RouletteHistoryWhereUniqueInput
+  ) => RouletteHistoryPromise;
+  deleteManyRouletteHistories: (
+    where?: RouletteHistoryWhereInput
+  ) => BatchPayloadPromise;
   createUser: (data: UserCreateInput) => UserPromise;
   updateUser: (args: {
     data: UserUpdateInput;
@@ -86,6 +130,9 @@ export interface Prisma {
 }
 
 export interface Subscription {
+  rouletteHistory: (
+    where?: RouletteHistorySubscriptionWhereInput
+  ) => RouletteHistorySubscriptionPayloadSubscription;
   user: (
     where?: UserSubscriptionWhereInput
   ) => UserSubscriptionPayloadSubscription;
@@ -99,11 +146,29 @@ export interface ClientConstructor<T> {
  * Types
  */
 
+export type RouletteHistoryOrderByInput =
+  | "id_ASC"
+  | "id_DESC"
+  | "hittedAt_ASC"
+  | "hittedAt_DESC"
+  | "createdAt_ASC"
+  | "createdAt_DESC"
+  | "updatedAt_ASC"
+  | "updatedAt_DESC";
+
 export type UserOrderByInput =
   | "id_ASC"
   | "id_DESC"
   | "name_ASC"
   | "name_DESC"
+  | "englishName_ASC"
+  | "englishName_DESC"
+  | "email_ASC"
+  | "email_DESC"
+  | "password_ASC"
+  | "password_DESC"
+  | "hitWeight_ASC"
+  | "hitWeight_DESC"
   | "createdAt_ASC"
   | "createdAt_DESC"
   | "updatedAt_ASC"
@@ -111,16 +176,37 @@ export type UserOrderByInput =
 
 export type MutationType = "CREATED" | "UPDATED" | "DELETED";
 
-export interface UserCreateInput {
-  name: String;
+export interface RouletteHistoryUpdateManyMutationInput {
+  hittedAt?: DateTimeInput;
+}
+
+export interface RouletteHistoryCreateInput {
+  user: UserCreateOneInput;
+  hittedAt: DateTimeInput;
+}
+
+export interface UserUpdateOneRequiredInput {
+  create?: UserCreateInput;
+  update?: UserUpdateDataInput;
+  upsert?: UserUpsertNestedInput;
+  connect?: UserWhereUniqueInput;
+}
+
+export type RouletteHistoryWhereUniqueInput = AtLeastOne<{
+  id: ID_Input;
+}>;
+
+export interface RouletteHistoryUpdateInput {
+  user?: UserUpdateOneRequiredInput;
+  hittedAt?: DateTimeInput;
 }
 
 export interface UserUpdateInput {
   name?: String;
-}
-
-export interface UserUpdateManyMutationInput {
-  name?: String;
+  englishName?: String;
+  email?: String;
+  password?: String;
+  hitWeight?: Int;
 }
 
 export interface UserWhereInput {
@@ -152,9 +238,144 @@ export interface UserWhereInput {
   name_not_starts_with?: String;
   name_ends_with?: String;
   name_not_ends_with?: String;
+  englishName?: String;
+  englishName_not?: String;
+  englishName_in?: String[] | String;
+  englishName_not_in?: String[] | String;
+  englishName_lt?: String;
+  englishName_lte?: String;
+  englishName_gt?: String;
+  englishName_gte?: String;
+  englishName_contains?: String;
+  englishName_not_contains?: String;
+  englishName_starts_with?: String;
+  englishName_not_starts_with?: String;
+  englishName_ends_with?: String;
+  englishName_not_ends_with?: String;
+  email?: String;
+  email_not?: String;
+  email_in?: String[] | String;
+  email_not_in?: String[] | String;
+  email_lt?: String;
+  email_lte?: String;
+  email_gt?: String;
+  email_gte?: String;
+  email_contains?: String;
+  email_not_contains?: String;
+  email_starts_with?: String;
+  email_not_starts_with?: String;
+  email_ends_with?: String;
+  email_not_ends_with?: String;
+  password?: String;
+  password_not?: String;
+  password_in?: String[] | String;
+  password_not_in?: String[] | String;
+  password_lt?: String;
+  password_lte?: String;
+  password_gt?: String;
+  password_gte?: String;
+  password_contains?: String;
+  password_not_contains?: String;
+  password_starts_with?: String;
+  password_not_starts_with?: String;
+  password_ends_with?: String;
+  password_not_ends_with?: String;
+  hitWeight?: Int;
+  hitWeight_not?: Int;
+  hitWeight_in?: Int[] | Int;
+  hitWeight_not_in?: Int[] | Int;
+  hitWeight_lt?: Int;
+  hitWeight_lte?: Int;
+  hitWeight_gt?: Int;
+  hitWeight_gte?: Int;
   AND?: UserWhereInput[] | UserWhereInput;
   OR?: UserWhereInput[] | UserWhereInput;
   NOT?: UserWhereInput[] | UserWhereInput;
+}
+
+export interface UserCreateOneInput {
+  create?: UserCreateInput;
+  connect?: UserWhereUniqueInput;
+}
+
+export interface UserCreateInput {
+  name: String;
+  englishName?: String;
+  email: String;
+  password: String;
+  hitWeight?: Int;
+}
+
+export interface RouletteHistorySubscriptionWhereInput {
+  mutation_in?: MutationType[] | MutationType;
+  updatedFields_contains?: String;
+  updatedFields_contains_every?: String[] | String;
+  updatedFields_contains_some?: String[] | String;
+  node?: RouletteHistoryWhereInput;
+  AND?:
+    | RouletteHistorySubscriptionWhereInput[]
+    | RouletteHistorySubscriptionWhereInput;
+  OR?:
+    | RouletteHistorySubscriptionWhereInput[]
+    | RouletteHistorySubscriptionWhereInput;
+  NOT?:
+    | RouletteHistorySubscriptionWhereInput[]
+    | RouletteHistorySubscriptionWhereInput;
+}
+
+export type UserWhereUniqueInput = AtLeastOne<{
+  id: ID_Input;
+  email?: String;
+}>;
+
+export interface UserUpdateManyMutationInput {
+  name?: String;
+  englishName?: String;
+  email?: String;
+  password?: String;
+  hitWeight?: Int;
+}
+
+export interface RouletteHistoryWhereInput {
+  id?: ID_Input;
+  id_not?: ID_Input;
+  id_in?: ID_Input[] | ID_Input;
+  id_not_in?: ID_Input[] | ID_Input;
+  id_lt?: ID_Input;
+  id_lte?: ID_Input;
+  id_gt?: ID_Input;
+  id_gte?: ID_Input;
+  id_contains?: ID_Input;
+  id_not_contains?: ID_Input;
+  id_starts_with?: ID_Input;
+  id_not_starts_with?: ID_Input;
+  id_ends_with?: ID_Input;
+  id_not_ends_with?: ID_Input;
+  user?: UserWhereInput;
+  hittedAt?: DateTimeInput;
+  hittedAt_not?: DateTimeInput;
+  hittedAt_in?: DateTimeInput[] | DateTimeInput;
+  hittedAt_not_in?: DateTimeInput[] | DateTimeInput;
+  hittedAt_lt?: DateTimeInput;
+  hittedAt_lte?: DateTimeInput;
+  hittedAt_gt?: DateTimeInput;
+  hittedAt_gte?: DateTimeInput;
+  AND?: RouletteHistoryWhereInput[] | RouletteHistoryWhereInput;
+  OR?: RouletteHistoryWhereInput[] | RouletteHistoryWhereInput;
+  NOT?: RouletteHistoryWhereInput[] | RouletteHistoryWhereInput;
+}
+
+export interface UserUpdateDataInput {
+  name?: String;
+  englishName?: String;
+  email?: String;
+  password?: String;
+  hitWeight?: Int;
+}
+
+export interface UserUpsertNestedInput {
+  update: UserUpdateDataInput;
+  create: UserCreateInput;
 }
 
 export interface UserSubscriptionWhereInput {
@@ -168,28 +389,58 @@ export interface UserSubscriptionWhereInput {
   NOT?: UserSubscriptionWhereInput[] | UserSubscriptionWhereInput;
 }
 
-export type UserWhereUniqueInput = AtLeastOne<{
-  id: ID_Input;
-}>;
-
 export interface NodeNode {
   id: ID_Output;
 }
 
-export interface AggregateUser {
-  count: Int;
+export interface RouletteHistoryConnection {
+  pageInfo: PageInfo;
+  edges: RouletteHistoryEdge[];
 }
 
-export interface AggregateUserPromise
-  extends Promise<AggregateUser>,
+export interface RouletteHistoryConnectionPromise
+  extends Promise<RouletteHistoryConnection>,
     Fragmentable {
-  count: () => Promise<Int>;
+  pageInfo: <T = PageInfoPromise>() => T;
+  edges: <T = FragmentableArray<RouletteHistoryEdge>>() => T;
+  aggregate: <T = AggregateRouletteHistoryPromise>() => T;
 }
 
-export interface AggregateUserSubscription
-  extends Promise<AsyncIterator<AggregateUser>>,
+export interface RouletteHistoryConnectionSubscription
+  extends Promise<AsyncIterator<RouletteHistoryConnection>>,
     Fragmentable {
-  count: () => Promise<AsyncIterator<Int>>;
+  pageInfo: <T = PageInfoSubscription>() => T;
+  edges: <T = Promise<AsyncIterator<RouletteHistoryEdgeSubscription>>>() => T;
+  aggregate: <T = AggregateRouletteHistorySubscription>() => T;
+}
+
+export interface User {
+  id: ID_Output;
+  name: String;
+  englishName?: String;
+  email: String;
+  password: String;
+  hitWeight?: Int;
+}
+
+export interface UserPromise extends Promise<User>, Fragmentable {
+  id: () => Promise<ID_Output>;
+  name: () => Promise<String>;
+  englishName: () => Promise<String>;
+  email: () => Promise<String>;
+  password: () => Promise<String>;
+  hitWeight: () => Promise<Int>;
+}
+
+export interface UserSubscription
+  extends Promise<AsyncIterator<User>>,
+    Fragmentable {
+  id: () => Promise<AsyncIterator<ID_Output>>;
+  name: () => Promise<AsyncIterator<String>>;
+  englishName: () => Promise<AsyncIterator<String>>;
+  email: () => Promise<AsyncIterator<String>>;
+  password: () => Promise<AsyncIterator<String>>;
+  hitWeight: () => Promise<AsyncIterator<Int>>;
 }
 
 export interface BatchPayload {
@@ -211,6 +462,10 @@ export interface BatchPayloadSubscription
 export interface UserPreviousValues {
   id: ID_Output;
   name: String;
+  englishName?: String;
+  email: String;
+  password: String;
+  hitWeight?: Int;
 }
 
 export interface UserPreviousValuesPromise
@@ -218,6 +473,10 @@ export interface UserPreviousValuesPromise
     Fragmentable {
   id: () => Promise<ID_Output>;
   name: () => Promise<String>;
+  englishName: () => Promise<String>;
+  email: () => Promise<String>;
+  password: () => Promise<String>;
+  hitWeight: () => Promise<Int>;
 }
 
 export interface UserPreviousValuesSubscription
@@ -225,6 +484,128 @@ export interface UserPreviousValuesSubscription
     Fragmentable {
   id: () => Promise<AsyncIterator<ID_Output>>;
   name: () => Promise<AsyncIterator<String>>;
+  englishName: () => Promise<AsyncIterator<String>>;
+  email: () => Promise<AsyncIterator<String>>;
+  password: () => Promise<AsyncIterator<String>>;
+  hitWeight: () => Promise<AsyncIterator<Int>>;
+}
+
+export interface UserConnection {
+  pageInfo: PageInfo;
+  edges: UserEdge[];
+}
+
+export interface UserConnectionPromise
+  extends Promise<UserConnection>,
+    Fragmentable {
+  pageInfo: <T = PageInfoPromise>() => T;
+  edges: <T = FragmentableArray<UserEdge>>() => T;
+  aggregate: <T = AggregateUserPromise>() => T;
+}
+
+export interface UserConnectionSubscription
+  extends Promise<AsyncIterator<UserConnection>>,
+    Fragmentable {
+  pageInfo: <T = PageInfoSubscription>() => T;
+  edges: <T = Promise<AsyncIterator<UserEdgeSubscription>>>() => T;
+  aggregate: <T = AggregateUserSubscription>() => T;
+}
+
+export interface RouletteHistorySubscriptionPayload {
+  mutation: MutationType;
+  node: RouletteHistory;
+  updatedFields: String[];
+  previousValues: RouletteHistoryPreviousValues;
+}
+
+export interface RouletteHistorySubscriptionPayloadPromise
+  extends Promise<RouletteHistorySubscriptionPayload>,
+    Fragmentable {
+  mutation: () => Promise<MutationType>;
+  node: <T = RouletteHistoryPromise>() => T;
+  updatedFields: () => Promise<String[]>;
+  previousValues: <T = RouletteHistoryPreviousValuesPromise>() => T;
+}
+
+export interface RouletteHistorySubscriptionPayloadSubscription
+  extends Promise<AsyncIterator<RouletteHistorySubscriptionPayload>>,
+    Fragmentable {
+  mutation: () => Promise<AsyncIterator<MutationType>>;
+  node: <T = RouletteHistorySubscription>() => T;
+  updatedFields: () => Promise<AsyncIterator<String[]>>;
+  previousValues: <T = RouletteHistoryPreviousValuesSubscription>() => T;
+}
+
+export interface RouletteHistoryPreviousValues {
+  id: ID_Output;
+  hittedAt: DateTimeOutput;
+}
+
+export interface RouletteHistoryPreviousValuesPromise
+  extends Promise<RouletteHistoryPreviousValues>,
+    Fragmentable {
+  id: () => Promise<ID_Output>;
+  hittedAt: () => Promise<DateTimeOutput>;
+}
+
+export interface RouletteHistoryPreviousValuesSubscription
+  extends Promise<AsyncIterator<RouletteHistoryPreviousValues>>,
+    Fragmentable {
+  id: () => Promise<AsyncIterator<ID_Output>>;
+  hittedAt: () => Promise<AsyncIterator<DateTimeOutput>>;
+}
+
+export interface RouletteHistory {
+  id: ID_Output;
+  hittedAt: DateTimeOutput;
+}
+
+export interface RouletteHistoryPromise
+  extends Promise<RouletteHistory>,
+    Fragmentable {
+  id: () => Promise<ID_Output>;
+  user: <T = UserPromise>() => T;
+  hittedAt: () => Promise<DateTimeOutput>;
+}
+
+export interface RouletteHistorySubscription
+  extends Promise<AsyncIterator<RouletteHistory>>,
+    Fragmentable {
+  id: () => Promise<AsyncIterator<ID_Output>>;
+  user: <T = UserSubscription>() => T;
+  hittedAt: () => Promise<AsyncIterator<DateTimeOutput>>;
+}
+
+export interface AggregateUser {
+  count: Int;
+}
+
+export interface AggregateUserPromise
+  extends Promise<AggregateUser>,
+    Fragmentable {
+  count: () => Promise<Int>;
+}
+
+export interface AggregateUserSubscription
+  extends Promise<AsyncIterator<AggregateUser>>,
+    Fragmentable {
+  count: () => Promise<AsyncIterator<Int>>;
+}
+
+export interface AggregateRouletteHistory {
+  count: Int;
+}
+
+export interface AggregateRouletteHistoryPromise
+  extends Promise<AggregateRouletteHistory>,
+    Fragmentable {
+  count: () => Promise<Int>;
+}
+
+export interface AggregateRouletteHistorySubscription
+  extends Promise<AsyncIterator<AggregateRouletteHistory>>,
+    Fragmentable {
+  count: () => Promise<AsyncIterator<Int>>;
 }
 
 export interface UserEdge {
@@ -242,6 +623,29 @@ export interface UserEdgeSubscription
     Fragmentable {
   node: <T = UserSubscription>() => T;
   cursor: () => Promise<AsyncIterator<String>>;
+}
+
+export interface PageInfo {
+  hasNextPage: Boolean;
+  hasPreviousPage: Boolean;
+  startCursor?: String;
+  endCursor?: String;
+}
+
+export interface PageInfoPromise extends Promise<PageInfo>, Fragmentable {
+  hasNextPage: () => Promise<Boolean>;
+  hasPreviousPage: () => Promise<Boolean>;
+  startCursor: () => Promise<String>;
+  endCursor: () => Promise<String>;
+}
+
+export interface PageInfoSubscription
+  extends Promise<AsyncIterator<PageInfo>>,
+    Fragmentable {
+  hasNextPage: () => Promise<AsyncIterator<Boolean>>;
+  hasPreviousPage: () => Promise<AsyncIterator<Boolean>>;
+  startCursor: () => Promise<AsyncIterator<String>>;
+  endCursor: () => Promise<AsyncIterator<String>>;
 }
 
 export interface UserSubscriptionPayload {
@@ -269,71 +673,24 @@ export interface UserSubscriptionPayloadSubscription
   previousValues: <T = UserPreviousValuesSubscription>() => T;
 }
 
-export interface User {
-  id: ID_Output;
-  name: String;
+export interface RouletteHistoryEdge {
+  node: RouletteHistory;
+  cursor: String;
 }
 
-export interface UserPromise extends Promise<User>, Fragmentable {
-  id: () => Promise<ID_Output>;
-  name: () => Promise<String>;
-}
-
-export interface UserSubscription
-  extends Promise<AsyncIterator<User>>,
+export interface RouletteHistoryEdgePromise
+  extends Promise<RouletteHistoryEdge>,
     Fragmentable {
-  id: () => Promise<AsyncIterator<ID_Output>>;
-  name: () => Promise<AsyncIterator<String>>;
+  node: <T = RouletteHistoryPromise>() => T;
+  cursor: () => Promise<String>;
 }
 
-export interface UserConnection {
-  pageInfo: PageInfo;
-  edges: UserEdge[];
-}
-
-export interface UserConnectionPromise
-  extends Promise<UserConnection>,
+export interface RouletteHistoryEdgeSubscription
+  extends Promise<AsyncIterator<RouletteHistoryEdge>>,
     Fragmentable {
-  pageInfo: <T = PageInfoPromise>() => T;
-  edges: <T = FragmentableArray<UserEdge>>() => T;
-  aggregate: <T = AggregateUserPromise>() => T;
+  node: <T = RouletteHistorySubscription>() => T;
+  cursor: () => Promise<AsyncIterator<String>>;
 }
-
-export interface UserConnectionSubscription
-  extends Promise<AsyncIterator<UserConnection>>,
-    Fragmentable {
-  pageInfo: <T = PageInfoSubscription>() => T;
-  edges: <T = Promise<AsyncIterator<UserEdgeSubscription>>>() => T;
-  aggregate: <T = AggregateUserSubscription>() => T;
-}
-
-export interface PageInfo {
-  hasNextPage: Boolean;
-  hasPreviousPage: Boolean;
-  startCursor?: String;
-  endCursor?: String;
-}
-
-export interface PageInfoPromise extends Promise<PageInfo>, Fragmentable {
-  hasNextPage: () => Promise<Boolean>;
-  hasPreviousPage: () => Promise<Boolean>;
-  startCursor: () => Promise<String>;
-  endCursor: () => Promise<String>;
-}
-
-export interface PageInfoSubscription
-  extends Promise<AsyncIterator<PageInfo>>,
-    Fragmentable {
-  hasNextPage: () => Promise<AsyncIterator<Boolean>>;
-  hasPreviousPage: () => Promise<AsyncIterator<Boolean>>;
-  startCursor: () => Promise<AsyncIterator<String>>;
-  endCursor: () => Promise<AsyncIterator<String>>;
-}
-
-/*
-The `String` scalar type represents textual data, represented as UTF-8 character sequences. The String type is most often used by GraphQL to represent free-form human-readable text.
-*/
-export type String = string;
 
 export type Long = string;
 
@@ -344,20 +701,39 @@ export type ID_Input = string | number;
 export type ID_Output = string;
 
 /*
+The `Boolean` scalar type represents `true` or `false`.
+*/
+export type Boolean = boolean;
+
+/*
+DateTime scalar input type, allowing Date
+*/
+export type DateTimeInput = Date | string;
+
+/*
+DateTime scalar output type, which is always a string
+*/
+export type DateTimeOutput = string;
+
+/*
 The `Int` scalar type represents non-fractional signed whole numeric values. Int can represent values between -(2^31) and 2^31 - 1. 
 */
 export type Int = number;
 
 /*
-The `Boolean` scalar type represents `true` or `false`.
+The `String` scalar type represents textual data, represented as UTF-8 character sequences. The String type is most often used by GraphQL to represent free-form human-readable text.
 */
-export type Boolean = boolean;
+export type String = string;
 
 /**
  * Model Metadata
  */
 
 export const models: Model[] = [
+  {
+    name: "RouletteHistory",
+    embedded: false
+  },
   {
     name: "User",
     embedded: false
