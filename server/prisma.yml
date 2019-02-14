@@ -7,7 +7,7 @@ generate:
 
 hooks:
     post-deploy:
-    - prisma generate
+#    - prisma generate
 
 seed:
     import: seed.graphql

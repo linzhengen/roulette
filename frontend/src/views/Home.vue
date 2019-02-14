@@ -2,6 +2,9 @@
   <div class="container" id="app">
     <div class="columns">
       <div class="column">
+        <div v-for="user in users" :key="user.id">
+          <div>{{ user.id }}, {{ user.name }}</div>
+        </div>
         <div class="columns is-centered">
           <input
             type="button"
@@ -42,9 +45,29 @@
 </template>
 
 <script>
+import gql from 'graphql-tag';
+
+const UsersQuery = gql`
+{
+  users {
+    ...user
+  }
+}
+fragment user on User {
+  name
+  id
+}
+`;
 export default {
+  apollo: {
+    users: {
+      query: UsersQuery,
+      loadingKey: 'loading',
+    },
+  },
   data() {
     return {
+      users: [{ name: 'test' }],
       options: ['Try Again'],
       new_option: '',
       startAngle: 0,

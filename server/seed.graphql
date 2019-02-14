@@ -1,0 +1,16 @@
+mutation {
+    user1: createUser(data: {
+        name: "日本 一郎"
+        hitWeight: 1
+        englishName: "nihon ichirou"
+    }) {
+        id
+    }
+    use2: createUser(data: {
+        name: "日本 次郎"
+        hitWeight: 1
+        englishName: "nihon zirou"
+    }) {
+        id
+    }
+}
