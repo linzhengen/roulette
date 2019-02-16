@@ -5,14 +5,13 @@
         <div class="columns is-centered">
           <input
             type="button"
-            class="button is-dark"
+            class="button is-danger"
             value="SPIN ROULETTE"
-            id='spin'
             v-on:click="spin"
           />
         </div>
         <div class="columns is-centered">
-          <canvas id="canvas" width="500" height="500"></canvas>
+          <canvas ref="rouletteCanvas" width="500" height="500"></canvas>
         </div>
       </div>
       <div class="column">
@@ -31,10 +30,14 @@
           <div class="column is-half">
             <button class="button is-primary" v-on:click="addOptions">Add</button>
           </div>
-          <div class="column is-one-quarter" v-for="o in options" :key="o.id">
-            <span> {{ o.name }} </span>
-            <br>
-            <button class="button is-danger" v-on:click="removeOptions(o.id)">x</button>
+          <div class="buttons">
+            <div class="button is-danger is-outlined"
+                 v-for="o in options" :key="o.id">
+              <span> {{ o.name }} </span>
+              <span class="icon is-small" v-on:click="removeOptions(o.id)">
+              <i class="fas fa-times"></i>
+            </span>
+            </div>
           </div>
         </div>
       </div>
@@ -116,7 +119,7 @@ export default {
     },
 
     drawRouletteWheel() {
-      const canvas = document.getElementById('canvas');
+      const canvas = this.$refs.rouletteCanvas;
       if (canvas.getContext) {
         const outsideRadius = 200;
         const textRadius = 160;
@@ -216,8 +219,9 @@ export default {
     },
   },
 
-  updated() {
-    this.drawRouletteWheel();
+  async mounted() {
+    await this.$apollo.queries.options.refetch();
+    await this.drawRouletteWheel();
   },
 };
 </script>
