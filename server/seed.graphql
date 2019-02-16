@@ -1,15 +1,19 @@
 mutation {
-    user1: createUser(data: {
-        name: "日本 一郎"
-        hitWeight: 1
-        englishName: "nihon ichirou"
+    option0: createOption(data: {
+        name: "Try Again"
+        weight: 1
     }) {
         id
     }
-    use2: createUser(data: {
-        name: "日本 次郎"
-        hitWeight: 1
-        englishName: "nihon zirou"
+    option1: createOption(data: {
+        name: "option-1"
+        weight: 1
+    }) {
+        id
+    }
+    option2: createOption(data: {
+        name: "option-2"
+        weight: 1
     }) {
         id
     }

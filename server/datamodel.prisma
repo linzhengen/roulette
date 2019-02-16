@@ -1,12 +1,11 @@
-type User {
+type Option {
   id: ID! @unique
   name: String!
-  englishName: String
-  hitWeight: Int
+  weight: Int
 }
 
 type RouletteHistory {
   id: ID! @unique
-  user: User!
-  hittedAt: DateTime!
+  option: Option!
+  hitAt: DateTime!
 }

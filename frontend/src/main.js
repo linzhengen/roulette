@@ -16,7 +16,7 @@ Vue.config.productionTip = false;
 
 const apolloProvider = new VueApollo({
   defaultClient: new ApolloClient({
-    link: new HttpLink({ uri: 'http://localhost:4466' }),
+    link: new HttpLink({ uri: process.env.VUE_APP_API_URL }),
     cache: new InMemoryCache(),
   }),
 });

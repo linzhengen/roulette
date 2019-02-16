@@ -2,9 +2,6 @@
   <div class="container" id="app">
     <div class="columns">
       <div class="column">
-        <div v-for="user in users" :key="user.id">
-          <div>{{ user.id }}, {{ user.name }}</div>
-        </div>
         <div class="columns is-centered">
           <input
             type="button"
@@ -34,9 +31,10 @@
           <div class="column is-half">
             <button class="button is-primary" v-on:click="addOptions">Add</button>
           </div>
-          <div class="column is-one-quarter" v-for="option in options" :key="option">
-            <button class="button is-danger" v-on:click="removeOptions(option)">x</button>
-            <span> {{ option }} </span>
+          <div class="column is-one-quarter" v-for="o in options" :key="o.id">
+            <span> {{ o.name }} </span>
+            <br>
+            <button class="button is-danger" v-on:click="removeOptions(o.id)">x</button>
           </div>
         </div>
       </div>
@@ -45,30 +43,19 @@
 </template>
 
 <script>
-import gql from 'graphql-tag';
+import { OptionsQuery } from '../graphql/query';
+import { createOptionMutation } from '../graphql/mutaion';
 
-const UsersQuery = gql`
-{
-  users {
-    ...user
-  }
-}
-fragment user on User {
-  name
-  id
-}
-`;
 export default {
   apollo: {
-    users: {
-      query: UsersQuery,
+    options: {
+      query: OptionsQuery,
       loadingKey: 'loading',
     },
   },
   data() {
     return {
-      users: [{ name: 'test' }],
-      options: ['Try Again'],
+      options: [],
       new_option: '',
       startAngle: 0,
       startAngleStart: 0,
@@ -109,15 +96,22 @@ export default {
       return this.RGB2Color(red, green, blue);
     },
 
-    addOptions() {
-      this.options.push(this.new_option);
+    async addOptions() {
+      await this.$apollo.mutate({
+        mutation: createOptionMutation,
+        // Parameters
+        variables: {
+          name: this.new_option,
+          weight: 1,
+        },
+      });
       this.new_option = '';
-      this.drawRouletteWheel();
+      await this.$apollo.queries.options.refetch();
+      await this.drawRouletteWheel();
     },
 
-    removeOptions(option) {
-      const idx = this.options.indexOf(option) || 0;
-      this.options.splice(idx, 1);
+    removeOptions(id) {
+      this.options = this.options.filter(option => option.id !== id);
       this.drawRouletteWheel();
     },
 
@@ -156,7 +150,7 @@ export default {
           this.ctx.translate(250 + Math.cos(angle + this.arc / 2) * textRadius,
             250 + Math.sin(angle + this.arc / 2) * textRadius);
           this.ctx.rotate(angle + this.arc / 2 + Math.PI / 2);
-          const text = this.options[i];
+          const text = this.options[i].name;
           this.ctx.fillText(text, -this.ctx.measureText(text).width / 2, 0);
           this.ctx.restore();
         }
@@ -208,7 +202,7 @@ export default {
       const index = Math.floor((360 - (degrees % 360)) / arcd);
       this.ctx.save();
       this.ctx.font = 'bold 30px Helvetica, Arial';
-      const text = this.options[index];
+      const text = this.options[index].name;
       console.log(index, text, this.options);
       this.ctx.fillText(text, 250 - this.ctx.measureText(text).width / 2, 250 + 10);
       this.ctx.restore();
@@ -222,7 +216,7 @@ export default {
     },
   },
 
-  mounted() {
+  updated() {
     this.drawRouletteWheel();
   },
 };

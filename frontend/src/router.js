@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import Router from 'vue-router';
 import Layout from './views/Layout.vue';
-import Home from './views/Home.vue';
+import Roulette from './views/Roulette.vue';
 
 Vue.use(Router);
 
@@ -17,12 +17,12 @@ export default new Router({
         {
           name: 'home',
           path: '',
-          component: Home,
+          component: Roulette,
         },
         {
-          name: 'user',
-          path: 'user',
-          component: () => import(/* webpackChunkName: "user" */ './views/User.vue'),
+          name: 'option',
+          path: 'option',
+          component: () => import(/* webpackChunkName: "user" */ './views/Option.vue'),
         },
       ],
     },
