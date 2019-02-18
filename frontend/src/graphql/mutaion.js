@@ -1,9 +1,9 @@
 import gql from 'graphql-tag';
 
 /* eslint-disable import/prefer-default-export */
-export const createOptionMutation = gql`
+export const createMemberMutation = gql`
   mutation ($name: String!, $weight: Int) {
-    createOption(data: {
+    createMember(data: {
       name: $name
       weight: $weight
     }) {
@@ -12,9 +12,30 @@ export const createOptionMutation = gql`
   }
 `;
 
-export const deleteOptionMutation = gql`
+export const deleteMemberMutation = gql`
   mutation ($id: String!) {
-    deleteOption(data: {
+    deleteMember(data: {
+      id: $id
+    }) {
+      id
+    }
+  }
+`;
+
+export const createItemMutation = gql`
+  mutation ($name: String!, $weight: Int) {
+    createItem(data: {
+      name: $name
+      weight: $weight
+    }) {
+      id
+    }
+  }
+`;
+
+export const deleteItemMutation = gql`
+  mutation ($id: String!) {
+    deleteItem(data: {
       id: $id
     }) {
       id

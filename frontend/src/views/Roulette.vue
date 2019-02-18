@@ -1,5 +1,5 @@
 <template>
-  <div class="container" id="app">
+  <div class="container">
     <div class="columns">
       <div class="column">
         <div class="columns is-centered">
@@ -7,7 +7,7 @@
             type="button"
             class="button is-danger"
             value="SPIN ROULETTE"
-            v-on:click="spin"
+            @click="spin"
           />
         </div>
         <div class="columns is-centered">
@@ -16,28 +16,69 @@
       </div>
       <div class="column">
         <div class="columns is-multiline">
-          <div class="column is-half">
-            <div class="field">
-              <input
-                class="input"
-                type="text"
-                placeholder="Input More Prize"
-                v-model="new_option"
-                v-on:keyup.enter="addOptions"
-              >
-            </div>
+          <div class="column">
+            <el-dialog
+              title="メンバーから追加"
+              :visible.sync="addMemberVisible"
+              width="600px"
+              center>
+              <el-transfer
+                v-model="selectedMembers"
+                :titles="['候補', '対象']"
+                :props="{
+                  key: 'id',
+                  label: 'name'
+                }"
+                filterable
+                @change="handleMemberChange"
+                :data="members">
+              </el-transfer>
+            </el-dialog>
+            <el-dialog
+              title="賞品から追加"
+              :visible.sync="addItemVisible"
+              width="600px"
+              center>
+              <el-transfer
+                v-model="selectedItems"
+                :titles="['候補', '対象']"
+                :props="{
+                  key: 'id',
+                  label: 'name'
+                }"
+                filterable
+                @change="handleItemChange"
+                :data="items">
+              </el-transfer>
+            </el-dialog>
+            <el-button type="success" @click="addMemberVisible = true" round>メンバーから追加</el-button>
+            <el-button type="warning" @click="addItemVisible = true" round>賞品から追加</el-button>
           </div>
-          <div class="column is-half">
-            <button class="button is-primary" v-on:click="addOptions">Add</button>
-          </div>
-          <div class="buttons">
-            <div class="button is-danger is-outlined"
-                 v-for="o in options" :key="o.id">
-              <span> {{ o.name }} </span>
-              <span class="icon is-small" v-on:click="removeOptions(o.id)">
-              <i class="fas fa-times"></i>
-            </span>
-            </div>
+        </div>
+        <div class="columns is-multiline">
+          <div class="column">
+            <el-popover
+              placement="bottom"
+              width="320"
+              trigger="click"
+              v-for="o in options" :key="o.id">
+              <el-form label-width="80px">
+                <el-form-item label="倍率">
+                  <el-input-number
+                    v-model="o.weight"
+                    :min="1"
+                    :max="10"
+                    label="倍率">
+                  </el-input-number>
+                </el-form-item>
+              </el-form>
+              <el-tag
+                slot="reference"
+                style="margin: 0.5em;"
+                @close="removeOptions(o.id)"
+                closable>{{ o.name }}
+              </el-tag>
+            </el-popover>
           </div>
         </div>
       </div>
@@ -46,19 +87,19 @@
 </template>
 
 <script>
-import { OptionsQuery } from '../graphql/query';
-import { createOptionMutation } from '../graphql/mutaion';
+import { MembersQuery, ItemsQuery } from '../graphql/query';
+// import { createItemMutation, createMemberMutation } from '../graphql/mutaion';
 
 export default {
-  apollo: {
-    options: {
-      query: OptionsQuery,
-      loadingKey: 'loading',
-    },
-  },
   data() {
     return {
+      addMemberVisible: false,
+      addItemVisible: false,
       options: [],
+      selectedMembers: [],
+      selectedItems: [],
+      members: [],
+      items: [],
       new_option: '',
       startAngle: 0,
       startAngleStart: 0,
@@ -74,18 +115,49 @@ export default {
       return Math.PI / (this.options.length / 2);
     },
   },
+  async mounted() {
+    this.members = (await this.$apollo.query({
+      query: MembersQuery,
+      loadingKey: 'loading',
+    })).data.members;
+    this.items = (await this.$apollo.query({
+      query: ItemsQuery,
+      loadingKey: 'loading',
+    })).data.items;
+    await this.drawRouletteWheel();
+  },
 
   methods: {
+    handleMemberChange(selectedKeys) {
+      this.options = [];
+      this.selectedItems = [];
+      selectedKeys.forEach((key) => {
+        this.options.push(this.members.find(m => m.id === key));
+      });
+      this.drawRouletteWheel();
+    },
+    handleItemChange(selectedKeys) {
+      this.options = [];
+      this.selectedMembers = [];
+      selectedKeys.forEach((key) => {
+        this.options.push(this.items.find(m => m.id === key));
+      });
+      this.drawRouletteWheel();
+    },
+    removeOptions(id) {
+      this.options = this.options.filter(option => option.id !== id);
+      this.selectedItems.splice(this.selectedItems.indexOf(id), 1);
+      this.selectedMembers.splice(this.selectedMembers.indexOf(id), 1);
+      this.drawRouletteWheel();
+    },
     byte2Hex(n) {
       const nybHexString = '0123456789ABCDEF';
       /* eslint-disable no-bitwise */
       return String(nybHexString.substr((n >> 4) & 0x0F, 1)) + nybHexString.substr(n & 0x0F, 1);
     },
-
     RGB2Color(r, g, b) {
       return `#${this.byte2Hex(r)}${this.byte2Hex(g)}${this.byte2Hex(b)}`;
     },
-
     getColor(item, maxitem) {
       const phase = 0;
       const center = 128;
@@ -98,26 +170,6 @@ export default {
 
       return this.RGB2Color(red, green, blue);
     },
-
-    async addOptions() {
-      await this.$apollo.mutate({
-        mutation: createOptionMutation,
-        // Parameters
-        variables: {
-          name: this.new_option,
-          weight: 1,
-        },
-      });
-      this.new_option = '';
-      await this.$apollo.queries.options.refetch();
-      await this.drawRouletteWheel();
-    },
-
-    removeOptions(id) {
-      this.options = this.options.filter(option => option.id !== id);
-      this.drawRouletteWheel();
-    },
-
     drawRouletteWheel() {
       const canvas = this.$refs.rouletteCanvas;
       if (canvas.getContext) {
@@ -172,14 +224,12 @@ export default {
         this.ctx.fill();
       }
     },
-
     spin() {
       this.spinAngleStart = Math.random() * 10 + 10;
       this.spinTime = 0;
       this.spinTimeTotal = Math.random() * 3 + 4 * 1000;
       this.rotateWheel();
     },
-
     rotateWheel() {
       this.spinTime += 30;
       if (this.spinTime >= this.spinTimeTotal) {
@@ -197,7 +247,6 @@ export default {
         that.rotateWheel();
       }, 30);
     },
-
     stopRotateWheel() {
       clearTimeout(this.spinTimeout);
       const degrees = this.startAngle * 180 / Math.PI + 90;
@@ -210,18 +259,12 @@ export default {
       this.ctx.fillText(text, 250 - this.ctx.measureText(text).width / 2, 250 + 10);
       this.ctx.restore();
     },
-
     easeOut(t, b, c, d) {
       /* eslint-disable no-param-reassign */
       const ts = (t /= d) * t;
       const tc = ts * t;
       return b + c * (tc + -3 * ts + 3 * t);
     },
-  },
-
-  async mounted() {
-    await this.$apollo.queries.options.refetch();
-    await this.drawRouletteWheel();
   },
 };
 </script>

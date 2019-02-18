@@ -1,18 +1,37 @@
 mutation {
-    option0: createOption(data: {
+    member0: createMember(data: {
         name: "Try Again"
         weight: 1
     }) {
         id
     }
-    option1: createOption(data: {
-        name: "option-1"
+    member1: createMember(data: {
+        name: "一郎"
         weight: 1
     }) {
         id
     }
-    option2: createOption(data: {
-        name: "option-2"
+    member2: createMember(data: {
+        name: "次郎"
+        weight: 1
+    }) {
+        id
+    }
+
+    item0: createItem(data: {
+        name: "Try Again"
+        weight: 1
+    }) {
+        id
+    }
+    item1: createItem(data: {
+        name: "賞金100万円"
+        weight: 1
+    }) {
+        id
+    }
+    item2: createItem(data: {
+        name: "１００Kg牛肉"
         weight: 1
     }) {
         id

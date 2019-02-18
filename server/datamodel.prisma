@@ -1,11 +1,23 @@
-type Option {
+type Member {
   id: ID! @unique
   name: String!
   weight: Int
 }
 
-type RouletteHistory {
+type Item {
   id: ID! @unique
-  option: Option!
+  name: String!
+  weight: Int
+}
+
+type RouletteMember {
+  id: ID! @unique
+  member: Member!
+  hitAt: DateTime!
+}
+
+type RouletteItem {
+  id: ID! @unique
+  item: Item!
   hitAt: DateTime!
 }

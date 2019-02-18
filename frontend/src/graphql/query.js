@@ -1,14 +1,28 @@
 import gql from 'graphql-tag';
 
 /* eslint-disable import/prefer-default-export */
-export const OptionsQuery = gql`
+export const MembersQuery = gql`
   {
-    options {
-      ...option
+    members {
+      ...member
     }
   }
-  fragment option on Option {
+  fragment member on Member {
     id
     name
+    weight
+  }
+`;
+
+export const ItemsQuery = gql`
+  {
+    items {
+      ...item
+    }
+  }
+  fragment item on Item {
+    id
+    name
+    weight
   }
 `;
