@@ -68,6 +68,7 @@
                     v-model="o.weight"
                     :min="1"
                     :max="10"
+                    @change="handleChangeWeight"
                     label="倍率">
                   </el-input-number>
                 </el-form-item>
@@ -112,7 +113,9 @@ export default {
   },
   computed: {
     arc() {
-      return Math.PI / (this.options.length / 2);
+      return Math.PI / (this.options.reduce(
+        (acc, cur) => ({ weight: acc.weight + cur.weight }),
+      ).weight / 2);
     },
   },
   async mounted() {
@@ -148,6 +151,9 @@ export default {
       this.options = this.options.filter(option => option.id !== id);
       this.selectedItems.splice(this.selectedItems.indexOf(id), 1);
       this.selectedMembers.splice(this.selectedMembers.indexOf(id), 1);
+      this.drawRouletteWheel();
+    },
+    handleChangeWeight() {
       this.drawRouletteWheel();
     },
     byte2Hex(n) {
@@ -186,13 +192,14 @@ export default {
         this.ctx.font = 'bold 12px Helvetica, Arial';
 
         for (let i = 0; i < this.options.length; i += 1) {
-          const angle = this.startAngle + i * this.arc;
+          const weightArc = this.arc * this.options[i].weight;
+          const angle = this.startAngle + i * weightArc;
           // this.ctx.fillStyle = colors[i];
           this.ctx.fillStyle = this.getColor(i, this.options.length);
 
           this.ctx.beginPath();
-          this.ctx.arc(250, 250, outsideRadius, angle, angle + this.arc, false);
-          this.ctx.arc(250, 250, insideRadius, angle + this.arc, angle, true);
+          this.ctx.arc(250, 250, outsideRadius, angle, angle + weightArc, false);
+          this.ctx.arc(250, 250, insideRadius, angle + weightArc, angle, true);
           this.ctx.stroke();
           this.ctx.fill();
 
@@ -202,9 +209,9 @@ export default {
           this.ctx.shadowBlur = 0;
           this.ctx.shadowColor = 'rgb(220,220,220)';
           this.ctx.fillStyle = 'black';
-          this.ctx.translate(250 + Math.cos(angle + this.arc / 2) * textRadius,
-            250 + Math.sin(angle + this.arc / 2) * textRadius);
-          this.ctx.rotate(angle + this.arc / 2 + Math.PI / 2);
+          this.ctx.translate(250 + Math.cos(angle + weightArc / 2) * textRadius,
+            250 + Math.sin(angle + weightArc / 2) * textRadius);
+          this.ctx.rotate(angle + weightArc / 2 + Math.PI / 2);
           const text = this.options[i].name;
           this.ctx.fillText(text, -this.ctx.measureText(text).width / 2, 0);
           this.ctx.restore();
@@ -255,7 +262,6 @@ export default {
       this.ctx.save();
       this.ctx.font = 'bold 30px Helvetica, Arial';
       const text = this.options[index].name;
-      console.log(index, text, this.options);
       this.ctx.fillText(text, 250 - this.ctx.measureText(text).width / 2, 250 + 10);
       this.ctx.restore();
     },
