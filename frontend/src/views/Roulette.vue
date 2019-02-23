@@ -59,20 +59,17 @@
           <div class="column">
             <el-popover
               placement="bottom"
-              width="320"
+              width="200"
               trigger="click"
               v-for="o in options" :key="o.id">
-              <el-form label-width="80px">
-                <el-form-item label="倍率">
-                  <el-input-number
-                    v-model="o.weight"
-                    :min="1"
-                    :max="10"
-                    @change="handleChangeWeight"
-                    label="倍率">
-                  </el-input-number>
-                </el-form-item>
-              </el-form>
+              <el-input-number
+                v-model="o.weight"
+                :min="1"
+                :max="100"
+                @keyup.enter="handleChangeWeightEnter"
+                @change="handleChangeWeight"
+                label="倍率">
+              </el-input-number>
               <el-tag
                 slot="reference"
                 style="margin: 0.5em;"
@@ -156,6 +153,9 @@ export default {
     handleChangeWeight() {
       this.drawRouletteWheel();
     },
+    handleChangeWeightEnter() {
+      return false;
+    },
     byte2Hex(n) {
       const nybHexString = '0123456789ABCDEF';
       /* eslint-disable no-bitwise */
@@ -191,15 +191,16 @@ export default {
 
         this.ctx.font = 'bold 12px Helvetica, Arial';
 
+        let { startAngle } = this;
         for (let i = 0; i < this.options.length; i += 1) {
           const weightArc = this.arc * this.options[i].weight;
-          const angle = this.startAngle + i * weightArc;
+          const endAngle = startAngle + weightArc;
           // this.ctx.fillStyle = colors[i];
           this.ctx.fillStyle = this.getColor(i, this.options.length);
 
           this.ctx.beginPath();
-          this.ctx.arc(250, 250, outsideRadius, angle, angle + weightArc, false);
-          this.ctx.arc(250, 250, insideRadius, angle + weightArc, angle, true);
+          this.ctx.arc(250, 250, outsideRadius, startAngle, endAngle, false);
+          this.ctx.arc(250, 250, insideRadius, endAngle, startAngle, true);
           this.ctx.stroke();
           this.ctx.fill();
 
@@ -209,12 +210,14 @@ export default {
           this.ctx.shadowBlur = 0;
           this.ctx.shadowColor = 'rgb(220,220,220)';
           this.ctx.fillStyle = 'black';
-          this.ctx.translate(250 + Math.cos(angle + weightArc / 2) * textRadius,
-            250 + Math.sin(angle + weightArc / 2) * textRadius);
-          this.ctx.rotate(angle + weightArc / 2 + Math.PI / 2);
+          this.ctx.translate(250 + Math.cos(startAngle + weightArc / 2) * textRadius,
+            250 + Math.sin(startAngle + weightArc / 2) * textRadius);
+          this.ctx.rotate(startAngle + weightArc / 2 + Math.PI / 2);
           const text = this.options[i].name;
           this.ctx.fillText(text, -this.ctx.measureText(text).width / 2, 0);
           this.ctx.restore();
+
+          startAngle = endAngle;
         }
 
         // Arrow
@@ -232,7 +235,7 @@ export default {
       }
     },
     spin() {
-      this.spinAngleStart = Math.random() * 10 + 10;
+      this.spinAngleStart = Math.random() * 1000 + 10;
       this.spinTime = 0;
       this.spinTimeTotal = Math.random() * 3 + 4 * 1000;
       this.rotateWheel();
@@ -261,7 +264,13 @@ export default {
       const index = Math.floor((360 - (degrees % 360)) / arcd);
       this.ctx.save();
       this.ctx.font = 'bold 30px Helvetica, Arial';
-      const text = this.options[index].name;
+      const weightOptions = [];
+      this.options.forEach((option) => {
+        for (let i = 0; i < option.weight; i += 1) {
+          weightOptions.push(option);
+        }
+      });
+      const text = weightOptions[index].name;
       this.ctx.fillText(text, 250 - this.ctx.measureText(text).width / 2, 250 + 10);
       this.ctx.restore();
     },

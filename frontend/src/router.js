@@ -19,11 +19,6 @@ export default new Router({
           path: '',
           component: Roulette,
         },
-        {
-          name: 'option',
-          path: 'option',
-          component: () => import(/* webpackChunkName: "user" */ './views/Option.vue'),
-        },
       ],
     },
   ],
