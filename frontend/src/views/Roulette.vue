@@ -55,18 +55,18 @@
             <el-button type="warning" @click="addItemVisible = true" round>賞品から追加</el-button>
           </div>
         </div>
-        <div class="columns is-multiline">
+        <div class="columns is-multiline" v-if="options.length > 0">
           <div class="column">
+            <h1 class="title">候補</h1>
             <el-popover
               placement="bottom"
               width="200"
-              trigger="click"
+              trigger="hover"
               v-for="o in options" :key="o.id">
               <el-input-number
                 v-model="o.weight"
                 :min="1"
                 :max="100"
-                @keyup.enter="handleChangeWeightEnter"
                 @change="handleChangeWeight"
                 label="倍率">
               </el-input-number>
@@ -77,6 +77,16 @@
                 closable>{{ o.name }}
               </el-tag>
             </el-popover>
+          </div>
+        </div>
+        <div class="columns is-multiline" v-if="gotOptions.length > 0">
+          <div class="column">
+            <h1 class="title">当選</h1>
+              <el-tag v-for="o in gotOptions" :key="o.id"
+                style="margin: 0.5em;"
+                @close="removeGotOptions(o.id)"
+                closable>{{ o.name }}
+              </el-tag>
           </div>
         </div>
       </div>
@@ -94,6 +104,7 @@ export default {
       addMemberVisible: false,
       addItemVisible: false,
       options: [],
+      gotOptions: [],
       selectedMembers: [],
       selectedItems: [],
       members: [],
@@ -150,11 +161,11 @@ export default {
       this.selectedMembers.splice(this.selectedMembers.indexOf(id), 1);
       this.drawRouletteWheel();
     },
+    removeGotOptions(id) {
+      this.gotOptions = this.gotOptions.filter(option => option.id !== id);
+    },
     handleChangeWeight() {
       this.drawRouletteWheel();
-    },
-    handleChangeWeightEnter() {
-      return false;
     },
     byte2Hex(n) {
       const nybHexString = '0123456789ABCDEF';
@@ -195,7 +206,6 @@ export default {
         for (let i = 0; i < this.options.length; i += 1) {
           const weightArc = this.arc * this.options[i].weight;
           const endAngle = startAngle + weightArc;
-          // this.ctx.fillStyle = colors[i];
           this.ctx.fillStyle = this.getColor(i, this.options.length);
 
           this.ctx.beginPath();
@@ -270,9 +280,17 @@ export default {
           weightOptions.push(option);
         }
       });
-      const text = weightOptions[index].name;
-      this.ctx.fillText(text, 250 - this.ctx.measureText(text).width / 2, 250 + 10);
+      const gotOption = weightOptions[index];
+      this.gotOptions.push(gotOption);
+      this.ctx.fillText(
+        gotOption.name,
+        250 - this.ctx.measureText(gotOption.name).width / 2, 250 + 10,
+      );
       this.ctx.restore();
+
+      setTimeout(() => {
+        this.removeOptions(gotOption.id);
+      }, 3000);
     },
     easeOut(t, b, c, d) {
       /* eslint-disable no-param-reassign */
