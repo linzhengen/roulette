@@ -13,8 +13,8 @@ export const createMemberMutation = gql`
 `;
 
 export const deleteMemberMutation = gql`
-  mutation ($id: String!) {
-    deleteMember(data: {
+  mutation ($id: ID!) {
+    deleteMember(where: {
       id: $id
     }) {
       id
@@ -34,8 +34,8 @@ export const createItemMutation = gql`
 `;
 
 export const deleteItemMutation = gql`
-  mutation ($id: String!) {
-    deleteItem(data: {
+  mutation ($id: ID!) {
+    deleteItem(where: {
       id: $id
     }) {
       id

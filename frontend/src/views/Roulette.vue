@@ -3,12 +3,11 @@
     <div class="columns">
       <div class="column">
         <div class="columns is-centered">
-          <input
-            type="button"
-            class="button is-danger"
-            value="SPIN ROULETTE"
+          <el-button
+            type="danger"
             @click="spin"
-          />
+            class="fas fa-compass"
+            :disabled="options.length === 0"> GO</el-button>
         </div>
         <div class="columns is-centered">
           <canvas ref="rouletteCanvas" width="500" height="500"></canvas>
@@ -19,9 +18,51 @@
           <div class="column">
             <el-dialog
               title="メンバーから追加"
-              :visible.sync="addMemberVisible"
+              :visible.sync="selectMemberVisible"
               width="600px"
               center>
+              <el-button
+                class="fas fa-user-edit"
+                style="margin: 0.5em;"
+                @click="editMemberVisible = true" circle/>
+              <el-dialog
+                width="600px"
+                title="メンバー管理"
+                :visible.sync="editMemberVisible"
+                append-to-body
+                center>
+                <el-form :inline="true" @submit.native.prevent>
+                  <el-form-item>
+                    <el-input
+                      v-model="addMemberName"
+                      size="mini"
+                      placeholder="Input member name"/>
+                  </el-form-item>
+                  <el-form-item>
+                    <el-button type="primary" @click="handleAddMember">Add</el-button>
+                  </el-form-item>
+                </el-form>
+                <el-table
+                  :data="members"
+                  style="width: 100%">
+                  <el-table-column
+                    type="index">
+                  </el-table-column>
+                  <el-table-column
+                    label="Name"
+                    prop="name">
+                  </el-table-column>
+                  <el-table-column
+                    align="right">
+                    <template slot-scope="scope">
+                      <el-button
+                        size="mini"
+                        type="danger"
+                        @click="handleMemberDelete(scope.row)">Delete</el-button>
+                    </template>
+                  </el-table-column>
+                </el-table>
+              </el-dialog>
               <el-transfer
                 v-model="selectedMembers"
                 :titles="['候補', '対象']"
@@ -36,7 +77,7 @@
             </el-dialog>
             <el-dialog
               title="賞品から追加"
-              :visible.sync="addItemVisible"
+              :visible.sync="selectItemVisible"
               width="600px"
               center>
               <el-transfer
@@ -51,8 +92,16 @@
                 :data="items">
               </el-transfer>
             </el-dialog>
-            <el-button type="success" @click="addMemberVisible = true" round>メンバーから追加</el-button>
-            <el-button type="warning" @click="addItemVisible = true" round>賞品から追加</el-button>
+            <el-button
+              type="success"
+              @click="selectMemberVisible = true"
+              class="fas fa-address-card"
+              circle/>
+            <el-button
+              type="warning"
+              @click="selectItemVisible = true"
+              class="fas fa-gift"
+              circle/>
           </div>
         </div>
         <div class="columns is-multiline" v-if="options.length > 0">
@@ -84,6 +133,7 @@
             <h1 class="title">当選</h1>
               <el-tag v-for="o in gotOptions" :key="o.id"
                 style="margin: 0.5em;"
+                type="danger"
                 @close="removeGotOptions(o.id)"
                 closable>{{ o.name }}
               </el-tag>
@@ -96,18 +146,20 @@
 
 <script>
 import { MembersQuery, ItemsQuery } from '../graphql/query';
-// import { createItemMutation, createMemberMutation } from '../graphql/mutaion';
+import { createMemberMutation, deleteMemberMutation } from '../graphql/mutaion';
 
 export default {
   data() {
     return {
-      addMemberVisible: false,
-      addItemVisible: false,
+      selectMemberVisible: false,
+      selectItemVisible: false,
+      editMemberVisible: false,
       options: [],
       gotOptions: [],
       selectedMembers: [],
       selectedItems: [],
       members: [],
+      addMemberName: null,
       items: [],
       new_option: '',
       startAngle: 0,
@@ -127,18 +179,47 @@ export default {
     },
   },
   async mounted() {
-    this.members = (await this.$apollo.query({
-      query: MembersQuery,
-      loadingKey: 'loading',
-    })).data.members;
-    this.items = (await this.$apollo.query({
-      query: ItemsQuery,
-      loadingKey: 'loading',
-    })).data.items;
+    await this.fetchMembers();
+    await this.fetchItems();
     await this.drawRouletteWheel();
   },
 
   methods: {
+    async handleAddMember() {
+      await this.$apollo.mutate({
+        // Query
+        mutation: createMemberMutation,
+        // Parameters
+        variables: {
+          name: this.addMemberName,
+          weight: 1,
+        },
+      });
+      await this.fetchMembers();
+      this.addMemberName = '';
+    },
+    async handleMemberDelete(row) {
+      await this.$apollo.mutate({
+        // Query
+        mutation: deleteMemberMutation,
+        // Parameters
+        variables: {
+          id: row.id,
+        },
+      });
+      await this.fetchMembers();
+    },
+    async fetchMembers() {
+      this.members = (await this.$apollo.query({
+        query: MembersQuery,
+        fetchPolicy: 'no-cache',
+      })).data.members;
+    },
+    async fetchItems() {
+      this.items = (await this.$apollo.query({
+        query: ItemsQuery,
+      })).data.items;
+    },
     handleMemberChange(selectedKeys) {
       this.options = [];
       this.selectedItems = [];
@@ -245,6 +326,9 @@ export default {
       }
     },
     spin() {
+      if (this.options.length === 0) {
+        return;
+      }
       this.spinAngleStart = Math.random() * 1000 + 10;
       this.spinTime = 0;
       this.spinTimeTotal = Math.random() * 3 + 4 * 1000;
@@ -290,7 +374,7 @@ export default {
 
       setTimeout(() => {
         this.removeOptions(gotOption.id);
-      }, 3000);
+      }, 2000);
     },
     easeOut(t, b, c, d) {
       /* eslint-disable no-param-reassign */

@@ -5,7 +5,7 @@ import { InMemoryCache } from 'apollo-cache-inmemory';
 import {
   Transfer, DropdownItem, Dropdown, DropdownMenu,
   Badge, InputNumber, Popover, Form, FormItem, Tag, Dialog,
-  Button,
+  Button, Table, TableColumn, Input,
 } from 'element-ui';
 import lang from 'element-ui/lib/locale/lang/ja';
 import locale from 'element-ui/lib/locale';
@@ -35,6 +35,9 @@ Vue.component(Form.name, Form);
 Vue.component(FormItem.name, FormItem);
 Vue.component(Button.name, Button);
 Vue.component(Tag.name, Tag);
+Vue.component(Table.name, Table);
+Vue.component(TableColumn.name, TableColumn);
+Vue.component(Input.name, Input);
 Vue.config.productionTip = false;
 
 const apolloProvider = new VueApollo({
