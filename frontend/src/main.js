@@ -5,7 +5,7 @@ import { InMemoryCache } from 'apollo-cache-inmemory';
 import {
   Transfer, DropdownItem, Dropdown, DropdownMenu,
   Badge, InputNumber, Popover, Form, FormItem, Tag, Dialog,
-  Button, Table, TableColumn, Input,
+  Button, Table, TableColumn, Input, Loading,
 } from 'element-ui';
 import lang from 'element-ui/lib/locale/lang/ja';
 import locale from 'element-ui/lib/locale';
@@ -23,6 +23,8 @@ locale.use(lang);
 
 Vue.use(VueMoment);
 Vue.use(VueApollo);
+Vue.use(Loading.directive);
+
 Vue.component(Dialog.name, Dialog);
 Vue.component(Transfer.name, Transfer);
 Vue.component(Dropdown.name, Dropdown);

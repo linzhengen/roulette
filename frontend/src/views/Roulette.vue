@@ -1,5 +1,5 @@
 <template>
-  <div class="container">
+  <div class="container" v-loading.fullscreen.lock="$apollo.loading">
     <div class="columns">
       <div class="column">
         <div class="columns is-centered">
@@ -80,6 +80,48 @@
               :visible.sync="selectItemVisible"
               width="600px"
               center>
+              <el-button
+                class="fas fa-user-edit"
+                style="margin: 0.5em;"
+                @click="editItemVisible = true" circle/>
+              <el-dialog
+                width="600px"
+                title="メンバー管理"
+                :visible.sync="editItemVisible"
+                append-to-body
+                center>
+                <el-form :inline="true" @submit.native.prevent>
+                  <el-form-item>
+                    <el-input
+                      v-model="addItemName"
+                      size="mini"
+                      placeholder="Input item name"/>
+                  </el-form-item>
+                  <el-form-item>
+                    <el-button type="primary" @click="handleAddItem">Add</el-button>
+                  </el-form-item>
+                </el-form>
+                <el-table
+                  :data="items"
+                  style="width: 100%">
+                  <el-table-column
+                    type="index">
+                  </el-table-column>
+                  <el-table-column
+                    label="Name"
+                    prop="name">
+                  </el-table-column>
+                  <el-table-column
+                    align="right">
+                    <template slot-scope="scope">
+                      <el-button
+                        size="mini"
+                        type="danger"
+                        @click="handleItemDelete(scope.row)">Delete</el-button>
+                    </template>
+                  </el-table-column>
+                </el-table>
+              </el-dialog>
               <el-transfer
                 v-model="selectedItems"
                 :titles="['候補', '対象']"
@@ -146,20 +188,35 @@
 
 <script>
 import { MembersQuery, ItemsQuery } from '../graphql/query';
-import { createMemberMutation, deleteMemberMutation } from '../graphql/mutaion';
+import {
+  createMemberMutation,
+  createItemMutation,
+  deleteMemberMutation,
+  deleteItemMutation,
+} from '../graphql/mutaion';
 
 export default {
+  apollo: {
+    members: {
+      query: MembersQuery,
+    },
+    items: {
+      query: ItemsQuery,
+    },
+  },
   data() {
     return {
       selectMemberVisible: false,
       selectItemVisible: false,
       editMemberVisible: false,
+      editItemVisible: false,
       options: [],
       gotOptions: [],
       selectedMembers: [],
       selectedItems: [],
       members: [],
       addMemberName: null,
+      addItemName: null,
       items: [],
       new_option: '',
       startAngle: 0,
@@ -178,10 +235,8 @@ export default {
       ).weight / 2);
     },
   },
-  async mounted() {
-    await this.fetchMembers();
-    await this.fetchItems();
-    await this.drawRouletteWheel();
+  mounted() {
+    this.drawRouletteWheel();
   },
 
   methods: {
@@ -195,7 +250,7 @@ export default {
           weight: 1,
         },
       });
-      await this.fetchMembers();
+      await this.$apollo.queries.members.refetch();
       this.addMemberName = '';
     },
     async handleMemberDelete(row) {
@@ -207,18 +262,7 @@ export default {
           id: row.id,
         },
       });
-      await this.fetchMembers();
-    },
-    async fetchMembers() {
-      this.members = (await this.$apollo.query({
-        query: MembersQuery,
-        fetchPolicy: 'no-cache',
-      })).data.members;
-    },
-    async fetchItems() {
-      this.items = (await this.$apollo.query({
-        query: ItemsQuery,
-      })).data.items;
+      await this.$apollo.queries.members.refetch();
     },
     handleMemberChange(selectedKeys) {
       this.options = [];
@@ -227,6 +271,30 @@ export default {
         this.options.push(this.members.find(m => m.id === key));
       });
       this.drawRouletteWheel();
+    },
+    async handleAddItem() {
+      await this.$apollo.mutate({
+        // Query
+        mutation: createItemMutation,
+        // Parameters
+        variables: {
+          name: this.addItemName,
+          weight: 1,
+        },
+      });
+      await this.$apollo.queries.items.refetch();
+      this.addItemName = '';
+    },
+    async handleItemDelete(row) {
+      await this.$apollo.mutate({
+        // Query
+        mutation: deleteItemMutation,
+        // Parameters
+        variables: {
+          id: row.id,
+        },
+      });
+      await this.$apollo.queries.items.refetch();
     },
     handleItemChange(selectedKeys) {
       this.options = [];
