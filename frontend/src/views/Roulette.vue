@@ -193,7 +193,7 @@ import {
   createItemMutation,
   deleteMemberMutation,
   deleteItemMutation,
-} from '../graphql/mutaion';
+} from '../graphql/mutation';
 
 export default {
   apollo: {
