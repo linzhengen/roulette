@@ -86,7 +86,7 @@
                 @click="editItemVisible = true" circle/>
               <el-dialog
                 width="600px"
-                title="メンバー管理"
+                title="賞品管理"
                 :visible.sync="editItemVisible"
                 append-to-body
                 center>
@@ -207,25 +207,24 @@ export default {
   data() {
     return {
       selectMemberVisible: false,
-      selectItemVisible: false,
       editMemberVisible: false,
+      selectItemVisible: false,
       editItemVisible: false,
-      options: [],
-      gotOptions: [],
+      addMemberName: null,
+      addItemName: null,
       selectedMembers: [],
       selectedItems: [],
       members: [],
-      addMemberName: null,
-      addItemName: null,
       items: [],
-      new_option: '',
+      options: [],
+      gotOptions: [],
       startAngle: 0,
       startAngleStart: 0,
       spinTimeout: null,
       spinArcStart: 10,
       spinTime: 0,
       spinTimeTotal: 0,
-      ctx: '',
+      ctx: null,
     };
   },
   computed: {
