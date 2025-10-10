@@ -1,0 +1,16 @@
+{
+  "name": "roulette-refactored",
+  "version": "1.0.0",
+  "description": "ルーレットアプリ - Vue.js 3とReact.jsで実装",
+  "main": "index.html",
+  "scripts": {
+    "serve": "python3 -m http.server 8000",
+    "serve-vue": "python3 -m http.server 8001",
+    "serve-react": "python3 -m http.server 8002"
+  },
+  "keywords": ["roulette", "vue", "react", "javascript"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {}
+}

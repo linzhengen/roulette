@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ルーレットアプリ</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <section class="section">
+        <div class="container">
+            <div class="columns is-centered">
+                <div class="column is-8">
+                    <h1 class="title has-text-centered">ルーレットアプリ</h1>
+                    <div class="notification is-info">
+                        <p>このルーレットアプリはVue.js 3とReact.jsの両方で実装されています。選択肢を追加してルーレットを回しましょう！</p>
+                        <p>選択肢はブラウザのローカルストレージに保存されます。</p>
+                    </div>
+
+                    <div class="columns">
+                        <div class="column">
+                            <div class="card">
+                                <div class="card-content">
+                                    <div class="media">
+                                        <div class="media-left">
+                                            <span class="icon is-large">
+                                                <i class="fab fa-vuejs fa-3x has-text-success"></i>
+                                            </span>
+                                        </div>
+                                        <div class="media-content">
+                                            <p class="title is-4">Vue.js バージョン</p>
+                                            <p class="subtitle is-6">Vue.js 3 Composition APIで実装</p>
+                                        </div>
+                                    </div>
+                                    <div class="content">
+                                        <p>Vue.js 3の最新機能を利用したモダンな実装です。</p>
+                                        <a href="src/vue/index.html" class="button is-success is-fullwidth">
+                                            <span class="icon">
+                                                <i class="fas fa-external-link-alt"></i>
+                                            </span>
+                                            <span>Vue.js ルーレットを開く</span>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="column">
+                            <div class="card">
+                                <div class="card-content">
+                                    <div class="media">
+                                        <div class="media-left">
+                                            <span class="icon is-large">
+                                                <i class="fab fa-react fa-3x has-text-info"></i>
+                                            </span>
+                                        </div>
+                                        <div class="media-content">
+                                            <p class="title is-4">React バージョン</p>
+                                            <p class="subtitle is-6">React 18 Hooksで実装</p>
+                                        </div>
+                                    </div>
+                                    <div class="content">
+                                        <p>React Hooksを使用した関数コンポーネントでの実装です。</p>
+                                        <a href="src/react/index.html" class="button is-info is-fullwidth">
+                                            <span class="icon">
+                                                <i class="fas fa-external-link-alt"></i>
+                                            </span>
+                                            <span>React ルーレットを開く</span>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="content mt-6">
+                        <h2 class="title is-5">機能</h2>
+                        <ul>
+                            <li>選択肢の追加・削除</li>
+                            <li>選択肢の重み付け（確率調整）</li>
+                            <li>ルーレットの回転アニメーション</li>
+                            <li>当選結果の表示</li>
+                            <li>ローカルストレージによるデータ永続化</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</body>
+</html>

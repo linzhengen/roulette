@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vue.js ルーレット</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <section class="section">
+        <div class="container">
+            <div class="columns is-centered">
+                <div class="column is-10">
+                    <h1 class="title has-text-centered">Vue.js ルーレット</h1>
+                    <div id="app"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <style>
+        .roulette-container {
+            padding: 1rem;
+        }
+
+        .option-item {
+            transition: all 0.2s ease;
+        }
+
+        .option-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .option-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        /* モバイル対応 */
+        @media (max-width: 768px) {
+            .roulette-container {
+                padding: 0.5rem;
+            }
+
+            canvas {
+                max-width: 100%;
+                height: auto;
+            }
+        }
+
+        /* アニメーション */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .option-item {
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tag.is-success {
+            animation: fadeIn 0.5s ease;
+        }
+    </style>
+
+    <script src="../../components/roulette/RouletteCore.js"></script>
+    <script type="module">
+        import { createApp, ref, onMounted, watch } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js'
+
+        let optionIdCounter = 1;
+
+        function generateColor(id) {
+            const colors = [
+                '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7',
+                '#DDA0DD', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E9'
+            ];
+            return colors[id % colors.length];
+        }
+
+        const VueRoulette = {
+            template: `
+                <div class="roulette-container">
+                    <!-- ヘッダーセクション -->
+                    <div class="columns is-mobile is-centered mb-5">
+                        <div class="column is-half-desktop is-full-mobile">
+                            <div class="box has-background-light">
+                                <div class="field has-addons">
+                                    <div class="control is-expanded">
+                                        <input
+                                            v-model="newOptionName"
+                                            class="input is-medium"
+                                            type="text"
+                                            placeholder="選択肢を追加..."
+                                            @keyup.enter="addOption"
+                                        />
+                                    </div>
+                                    <div class="control">
+                                        <button class="button is-primary is-medium" @click="addOption">
+                                            <span class="icon">
+                                                <i class="fas fa-plus"></i>
+                                            </span>
+                                            <span>追加</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- メインコンテンツ -->
+                    <div class="columns is-desktop">
+                        <!-- ルーレットセクション -->
+                        <div class="column is-half-desktop is-full-mobile">
+                            <div class="card">
+                                <div class="card-content">
+                                    <h2 class="title is-4 has-text-centered mb-4">ルーレット</h2>
+                                    <div class="has-text-centered">
+                                        <canvas ref="rouletteCanvas" width="500" height="500" style="max-width: 100%;"></canvas>
+                                    </div>
+                                    <div class="has-text-centered mt-4">
+                                        <button
+                                            class="button is-danger is-large is-rounded"
+                                            @click="spin"
+                                            :disabled="options.length === 0"
+                                            :class="{ 'is-loading': isSpinning }"
+                                        >
+                                            <span class="icon">
+                                                <i class="fas fa-play"></i>
+                                            </span>
+                                            <span>スタート！</span>
+                                        </button>
+                                    </div>
+                                    <div class="has-text-centered mt-2">
+                                        <small class="has-text-grey">選択肢が{{ options.length }}個あります</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 選択肢セクション -->
+                        <div class="column is-half-desktop is-full-mobile">
+                            <!-- 候補リスト -->
+                            <div class="card mb-4" v-if="options.length > 0">
+                                <div class="card-header">
+                                    <p class="card-header-title">
+                                        <span class="icon">
+                                            <i class="fas fa-list"></i>
+                                        </span>
+                                        <span>候補リスト ({{ options.length }})</span>
+                                    </p>
+                                </div>
+                                <div class="card-content">
+                                    <div class="content">
+                                        <div class="option-list">
+                                            <div
+                                                v-for="option in options"
+                                                :key="option.id"
+                                                class="option-item box is-flex is-align-items-center is-justify-content-space-between mb-2"
+                                                :style="{ borderLeft: '4px solid ' + getOptionColor(option.id) }"
+                                            >
+                                                <div class="is-flex-grow-1">
+                                                    <strong>{{ option.name }}</strong>
+                                                    <div class="field has-addons mt-1">
+                                                        <div class="control">
+                                                            <span class="tag">重み</span>
+                                                        </div>
+                                                        <div class="control">
+                                                            <input
+                                                                v-model.number="option.weight"
+                                                                class="input is-small"
+                                                                type="number"
+                                                                min="1"
+                                                                max="100"
+                                                                style="width: 70px;"
+                                                                @change="updateWeight"
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <button
+                                                    class="button is-small is-danger is-outlined"
+                                                    @click="removeOption(option.id)"
+                                                    title="削除"
+                                                >
+                                                    <span class="icon">
+                                                        <i class="fas fa-trash"></i>
+                                                    </span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 当選結果 -->
+                            <div class="card" v-if="gotOptions.length > 0">
+                                <div class="card-header">
+                                    <p class="card-header-title has-text-success">
+                                        <span class="icon">
+                                            <i class="fas fa-trophy"></i>
+                                        </span>
+                                        <span>当選結果 ({{ gotOptions.length }})</span>
+                                    </p>
+                                </div>
+                                <div class="card-content">
+                                    <div class="content">
+                                        <div class="tags are-medium">
+                                            <div
+                                                v-for="option in gotOptions"
+                                                :key="option.id"
+                                                class="tag is-success is-light"
+                                            >
+                                                {{ option.name }}
+                                                <button
+                                                    class="delete is-small ml-2"
+                                                    @click="removeGotOption(option.id)"
+                                                ></button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 空の状態 -->
+                            <div class="card" v-if="options.length === 0 && gotOptions.length === 0">
+                                <div class="card-content has-text-centered">
+                                    <div class="content">
+                                        <span class="icon is-large has-text-grey-light mb-3">
+                                            <i class="fas fa-list-ul fa-2x"></i>
+                                        </span>
+                                        <p class="has-text-grey">選択肢を追加してルーレットを回しましょう！</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `,
+            setup() {
+                const rouletteCanvas = ref(null);
+                const newOptionName = ref('');
+                const options = ref([]);
+                const gotOptions = ref([]);
+                const rouletteCore = ref(null);
+                const optionColors = ref({});
+                const isSpinning = ref(false);
+
+                const loadFromLocalStorage = () => {
+                    const savedOptions = localStorage.getItem('rouletteOptions');
+                    if (savedOptions) {
+                        options.value = JSON.parse(savedOptions);
+                        // Ensure all options have IDs
+                        options.value.forEach(option => {
+                            if (!option.id) {
+                                option.id = optionIdCounter++;
+                            }
+                            if (!option.weight) {
+                                option.weight = 1;
+                            }
+                        });
+                    }
+
+                    const savedWinners = localStorage.getItem('rouletteWinners');
+                    if (savedWinners) {
+                        gotOptions.value = JSON.parse(savedWinners);
+                    }
+                };
+
+                const saveToLocalStorage = () => {
+                    localStorage.setItem('rouletteOptions', JSON.stringify(options.value));
+                    localStorage.setItem('rouletteWinners', JSON.stringify(gotOptions.value));
+                };
+
+                const getOptionColor = (id) => {
+                    if (!optionColors.value[id]) {
+                        optionColors.value[id] = generateColor(id);
+                    }
+                    return optionColors.value[id];
+                };
+
+                const addOption = () => {
+                    if (newOptionName.value.trim()) {
+                        const newOption = {
+                            id: optionIdCounter++,
+                            name: newOptionName.value.trim(),
+                            weight: 1
+                        };
+                        options.value.push(newOption);
+                        newOptionName.value = '';
+                        saveToLocalStorage();
+                    }
+                };
+
+                const removeOption = (id) => {
+                    options.value = options.value.filter(option => option.id !== id);
+                    saveToLocalStorage();
+                };
+
+                const removeGotOption = (id) => {
+                    const optionToRestore = gotOptions.value.find(option => option.id === id);
+                    if (optionToRestore) {
+                        // 候補に戻す
+                        options.value.push(optionToRestore);
+                        gotOptions.value = gotOptions.value.filter(option => option.id !== id);
+                        saveToLocalStorage();
+                    }
+                };
+
+                const updateWeight = () => {
+                    saveToLocalStorage();
+                };
+
+                const spin = () => {
+                    if (rouletteCore.value && options.value.length > 0) {
+                        isSpinning.value = true;
+                        rouletteCore.value.spin((result) => {
+                            gotOptions.value.push(result);
+                            isSpinning.value = false;
+                            setTimeout(() => {
+                                removeOption(result.id);
+                            }, 2000);
+                        });
+                    }
+                };
+
+                onMounted(() => {
+                    loadFromLocalStorage();
+                    if (rouletteCanvas.value && window.RouletteCore) {
+                        rouletteCore.value = new window.RouletteCore(rouletteCanvas.value);
+                    }
+                });
+
+                watch(options, (newOptions) => {
+                    if (rouletteCore.value) {
+                        rouletteCore.value.setOptions(newOptions);
+                    }
+                }, { deep: true });
+
+                return {
+                    rouletteCanvas,
+                    newOptionName,
+                    options,
+                    gotOptions,
+                    isSpinning,
+                    addOption,
+                    removeOption,
+                    removeGotOption,
+                    updateWeight,
+                    spin,
+                    getOptionColor
+                };
+            }
+        };
+
+        const app = createApp({
+            template: `
+                <div>
+                    <div class="notification is-info">
+                        <p>Vue.js 3で実装されたルーレットアプリです。選択肢を追加してルーレットを回しましょう！</p>
+                    </div>
+                    <VueRoulette />
+                </div>
+            `,
+            components: {
+                VueRoulette
+            }
+        })
+
+        app.mount('#app')
+    </script>
+</body>
+</html>

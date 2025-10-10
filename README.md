@@ -1,56 +1,94 @@
-# roulette
+# ルーレットアプリ (Refactored)
 
-## 開発環境構築
-### 前提
-+ Docker
-+ Docker Compose
-+ Node.js(v11.11.0+)
-+ Yarn
-+ Port Number
-  + 4466(for prisma)
-  + 5432(for postgres)
+Vue.js 3とReact.jsで実装されたルーレットアプリケーションです。
 
-### Install the Prisma CLI
-```
-brew tap prisma/prisma
-brew install prisma
-```
+## 機能
 
-### Run frontend
-```
-cd frontend
-yarn install 
-yarn serve
-```
+- 選択肢の追加・削除
+- 選択肢の重み付け（確率調整）
+- ルーレットの回転アニメーション
+- 当選結果の表示
+- ローカルストレージによるデータ永続化
 
-### Run server
+## プロジェクト構成
+
 ```
-cd server
-docker-compose up -d 
-prisma deploy
+roulette/
+├── components/roulette/
+│   ├── RouletteCore.js      # 共有ルーレット機能
+│   ├── VueRoulette.vue      # Vue.js 3コンポーネント
+│   └── ReactRoulette.jsx    # Reactコンポーネント
+├── src/
+│   ├── vue/
+│   │   └── index.html       # Vue.jsサンプルページ
+│   └── react/
+│       └── index.html       # Reactサンプルページ
+├── index.html               # メインページ
+├── package.json
+└── README.md
 ```
 
-## 稼働環境構築
-### netlify deploy
-+ githubを選択、siteを新規作成
-+ `Build & deploy` > `Build settings` の画面で下記の項目を設定
-  + Base directory: `frontend`
-  + Build command: `echo "VUE_APP_API_URL=https://{heroku appに書き換え}.herokuapp.com" > .env.production && yarn build --mode production`
-  + Publish directory: `frontend/dist`
+## 使用方法
 
-### heroku deploy
-+ prismaにログイン、下記URLに書いてある手順でheroku側のサーバーを作成(初回のみ必須、サーバ作成済みの場合不要)
-  + https://www.prisma.io/blog/heroku-integration-homihof6eifi
-+ managementApiSecretを調べる(server/.env.productionに使う)
-  + `heroku prisma app` > `Settings` > `Config Vars` > `CONFIG`の中の `managementApiSecret`をメモ 
-+ server/.env.productionを作成  
-  vi server/.env.production
-  ```
-  PRISMA_ENDPOINT="https://{heroku appに書き換え}.herokuapp.com"
-  PRISMA_MANAGEMENT_API_SECRET="{メモしたmanagementApiSecret}"
-  ```
-+ deploy
-  ```
-  cd server
-  prisma deploy --env-file .env.production
-  ```
+### 1. メインページから選択
+```bash
+# プロジェクトルートでHTTPサーバーを起動
+python3 -m http.server 8000
+```
+
+ブラウザで `http://localhost:8000` にアクセスし、Vue.jsまたはReactバージョンを選択してください。
+
+### 2. 直接アクセス
+- Vue.jsバージョン: `src/vue/index.html`
+- Reactバージョン: `src/react/index.html`
+
+## 実装の特徴
+
+### 共有機能 (RouletteCore.js)
+- ルーレットの描画ロジック
+- 回転アニメーション
+- 当選判定アルゴリズム
+- Vue.jsとReactで共通利用
+
+### Vue.js 3実装
+- Composition APIを使用
+- リアクティブな状態管理
+- コンポーネントベースの設計
+
+### React実装
+- React 18 Hooksを使用
+- 関数コンポーネント
+- 状態管理と副作用処理
+
+## ローカルストレージ
+
+選択肢データはブラウザのローカルストレージに保存され、ページをリロードしてもデータが保持されます。
+
+## 技術スタック
+
+- **Vue.js 3**: Composition API, リアクティブシステム
+- **React 18**: Hooks, 関数コンポーネント
+- **Bulma CSS**: レスポンシブデザイン
+- **Font Awesome**: アイコン
+- **Canvas API**: ルーレット描画
+
+## 開発
+
+```bash
+# メインページを表示
+npm run serve
+
+# Vue.jsページを表示
+npm run serve-vue
+
+# Reactページを表示
+npm run serve-react
+```
+
+## 元のプロジェクトからの変更点
+
+- サーバーサイド実装を削除
+- フロントエンドをVue.js 3とReact.jsで再実装
+- ローカルストレージによるデータ永続化
+- 共有コア機能の分離
+- モダンなフレームワーク対応
