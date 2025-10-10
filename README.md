@@ -30,15 +30,28 @@ roulette/
 
 ## 使用方法
 
-### 1. メインページから選択
+### オンライン版
+このアプリはNetlifyにデプロイされており、直接アクセスできます。
+
+### ローカル開発
+任意のHTTPサーバーを使用してプロジェクトを実行できます:
+
 ```bash
-# プロジェクトルートでHTTPサーバーを起動
+# npxを使用（推奨）
+npx serve .
+
+# または、別のHTTPサーバーを使用
+# Node.jsの場合
+npx http-server
+
+# Pythonの場合
 python3 -m http.server 8000
 ```
 
-ブラウザで `http://localhost:8000` にアクセスし、Vue.jsまたはReactバージョンを選択してください。
+ブラウザでサーバーのURLにアクセスし、Vue.jsまたはReactバージョンを選択してください。
 
-### 2. 直接アクセス
+### 直接アクセス
+- メインページ: `index.html`
 - Vue.jsバージョン: `src/vue/index.html`
 - Reactバージョン: `src/react/index.html`
 
@@ -72,18 +85,26 @@ python3 -m http.server 8000
 - **Font Awesome**: アイコン
 - **Canvas API**: ルーレット描画
 
-## 開発
+## Netlifyへのデプロイ
 
-```bash
-# メインページを表示
-npm run serve
+このプロジェクトはNetlifyに簡単にデプロイできます:
 
-# Vue.jsページを表示
-npm run serve-vue
+### 方法1: Git連携（推奨）
+1. GitHubなどにリポジトリをプッシュ
+2. Netlifyにログインし、「New site from Git」を選択
+3. リポジトリを選択
+4. ビルド設定は自動で検出されます（netlify.tomlに定義済み）
+5. 「Deploy site」をクリック
 
-# Reactページを表示
-npm run serve-react
-```
+### 方法2: ドラッグ&ドロップ
+1. [Netlify Drop](https://app.netlify.com/drop)にアクセス
+2. プロジェクトフォルダをドラッグ&ドロップ
+3. 即座にデプロイ完了
+
+### ビルド設定
+- **Publish directory**: `.` （ルートディレクトリ）
+- **Build command**: `npm run build`
+- **Node version**: 任意（ビルド不要のため）
 
 ## 元のプロジェクトからの変更点
 
