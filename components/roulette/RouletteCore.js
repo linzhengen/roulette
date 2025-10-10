@@ -143,17 +143,19 @@ class RouletteCore {
 
     const gotOption = weightOptions[index];
 
-    this.ctx.save();
-    this.ctx.font = 'bold 30px Helvetica, Arial';
-    this.ctx.fillText(
-      gotOption.name,
-      250 - this.ctx.measureText(gotOption.name).width / 2,
-      250 + 10
-    );
-    this.ctx.restore();
+    if (gotOption) {
+      this.ctx.save();
+      this.ctx.font = 'bold 30px Helvetica, Arial';
+      this.ctx.fillText(
+        gotOption.name,
+        250 - this.ctx.measureText(gotOption.name).width / 2,
+        250 + 10
+      );
+      this.ctx.restore();
 
-    if (onResult) {
-      onResult(gotOption);
+      if (onResult) {
+        onResult(gotOption);
+      }
     }
   }
 

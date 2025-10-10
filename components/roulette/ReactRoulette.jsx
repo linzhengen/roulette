@@ -18,6 +18,7 @@ const ReactRoulette = () => {
   const [gotOptions, setGotOptions] = useState([]);
   const [rouletteCore, setRouletteCore] = useState(null);
   const [optionColors, setOptionColors] = useState({});
+  const [isSpinning, setIsSpinning] = useState(false);
 
   // Load from localStorage on component mount
   useEffect(() => {
@@ -93,10 +94,12 @@ const ReactRoulette = () => {
 
   const spin = () => {
     if (rouletteCore && options.length > 0) {
+      setIsSpinning(true);
       rouletteCore.spin((result) => {
         setGotOptions(prev => [...prev, result]);
+        setIsSpinning(false);
         setTimeout(() => {
-          removeOption(result.id);
+          setOptions(prev => prev.filter(option => option.id !== result.id));
         }, 2000);
       });
     }
@@ -114,7 +117,7 @@ const ReactRoulette = () => {
         <div className="column">
           <div className="columns is-centered">
             <button
-              className="button is-danger"
+              className={`button is-danger ${isSpinning ? 'is-loading' : ''}`}
               onClick={spin}
               disabled={options.length === 0}
             >
